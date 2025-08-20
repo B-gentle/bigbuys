@@ -6,4 +6,5 @@ export const env = {
     LOG_LEVEL: process.env.LOG_LEVEL as string,
     NODE_ENV: process.env.NODE_ENV as string,
     JWT_SECRET: process.env.JWT_SECRET as string,
+    PORT: process.env.PORT ?? 5000,
 }
