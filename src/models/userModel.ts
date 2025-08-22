@@ -1,6 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 import bcrypt from "bcryptjs";
 import { Roles } from "../commons/types";
+import { generateUniqueReferralCode } from "../utils/utils";
 
 const userSchema = new Schema(
   {
@@ -18,6 +19,16 @@ const userSchema = new Schema(
     password: {
       type: String,
       required: [true, "Please enter a password"],
+    },
+    phone: {
+      type: String,
+      required: [true, "Please enter a phone number"],
+      minlength: 8,
+      maxlength: 25,
+    },
+
+    referralCode: {
+      type: String,
     },
 
     role: {
@@ -42,6 +53,21 @@ userSchema.pre("save", async function (next) {
 userSchema.pre("save", function (next) {
   if (this.isModified("email")) {
     this.email = this.email.toLowerCase();
+  }
+  next();
+});
+
+/**
+ * Before saving a new user, ensure a unique referralCode exists
+ */
+userSchema.pre("save", async function (next) {
+  // only set for new documents or when referralCode not present
+  if (this.isNew && !this.referralCode) {
+    try {
+      this.referralCode = await generateUniqueReferralCode();
+    } catch (err) {
+      return next(err as Error);
+    }
   }
   next();
 });

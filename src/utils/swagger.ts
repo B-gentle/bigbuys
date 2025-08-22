@@ -4,7 +4,7 @@ import {
 } from "@asteasolutions/zod-to-openapi";
 import { authorize } from "../middlewares/authMiddleware";
 import { signInSchema, signUpSchema, userResponse } from "../schemas/userSchema";
-import { defaultSuccessResponse, genericRequestBody } from "./requestResponse";
+import { genericRequestBody } from "./requestResponse";
 
 const registry = new OpenAPIRegistry();
 
@@ -19,6 +19,27 @@ registry.registerPath({
   responses: {
     200: {
       description: "User signed in successfully",
+      content: {
+        "application/json": {
+          schema: userResponse
+        }
+      }
+    },
+    400: { description: "Invalid credentials" },
+  },
+});
+
+registry.registerPath({
+  method: "post",
+  path: "/api/users/signup",
+  tags: ["Auth"],
+  description: "User signup endpoint",
+  request: {
+    body: genericRequestBody(signUpSchema)
+  },
+  responses: {
+    200: {
+      description: "User signed up successfully",
       content: {
         "application/json": {
           schema: userResponse

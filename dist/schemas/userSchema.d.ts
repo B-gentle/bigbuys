@@ -15,4 +15,5 @@ export declare const userResponse: z.ZodObject<{
     createdAt: z.ZodDate;
     updatedAt: z.ZodDate;
 }, z.core.$strip>;
+export type SignUpReq = z.infer<typeof signUpSchema>;
 //# sourceMappingURL=userSchema.d.ts.map

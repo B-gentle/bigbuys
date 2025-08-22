@@ -25,6 +25,26 @@ registry.registerPath({
         400: { description: "Invalid credentials" },
     },
 });
+registry.registerPath({
+    method: "post",
+    path: "/api/users/signup",
+    tags: ["Auth"],
+    description: "User signup endpoint",
+    request: {
+        body: (0, requestResponse_1.genericRequestBody)(userSchema_1.signUpSchema)
+    },
+    responses: {
+        200: {
+            description: "User signed up successfully",
+            content: {
+                "application/json": {
+                    schema: userSchema_1.userResponse
+                }
+            }
+        },
+        400: { description: "Invalid credentials" },
+    },
+});
 // Generate OpenAPI spec
 const generator = new zod_to_openapi_1.OpenApiGeneratorV3(registry.definitions);
 exports.openApiSpec = generator.generateDocument({
