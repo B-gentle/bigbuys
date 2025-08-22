@@ -7,7 +7,6 @@
     "start": "node dist/server.js",
     "build": "rimraf dist && tsc",
     "ts.check": "tsc --project tsconfig.json",
-    "add-build": "git add dist",
     "dev": "nodemon --exec ts-node src/server.ts"
   },
   "author": "DaBee",
