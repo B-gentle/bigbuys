@@ -9,6 +9,7 @@ export const signUpSchema = z
     name: z.string().min(4).max(100),
     phone: z.string().min(8).max(25),
     referral: z.string().optional(),
+    role: z.enum(["user", "admin", "chef"]).optional(),
   })
   .openapi({
     example: {
@@ -17,6 +18,7 @@ export const signUpSchema = z
       name: "John Doe",
       phone: "+234812345678",
       referral: "REF123",
+      role: "user",
     },
   });
 
@@ -61,3 +63,4 @@ export const userResponse = z
   });
 
 export type SignUpReq = z.infer<typeof signUpSchema>;
+export type UserResponse = z.infer<typeof userResponse>;

@@ -3,6 +3,7 @@ import type { Response, NextFunction } from "express";
 import { logger } from "../utils/logger";
 import { env } from "../commons/env";
 import { AuthRequest } from "../commons/types";
+import { userRepo } from "../repository/userRepository";
 
 export async function authenticate(
   req: AuthRequest,
@@ -12,13 +13,13 @@ export async function authenticate(
   try {
     const authHeader = req.headers.authorization;
 
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      const err = new Error("Unauthorized: missing Bearer token");
+    if (!authHeader) {
+      const err = new Error("Unauthorized: missing auth token");
       (err as any).statusCode = 401;
       return next(err);
     }
 
-    const token = authHeader.slice(7).trim();
+    const token = authHeader;
     if (!token) {
       const err = new Error("Unauthorized: empty token");
       (err as any).statusCode = 401;
@@ -39,20 +40,31 @@ export async function authenticate(
 
     // normalize payload
     if (typeof payload === "string") {
-      // rarely used: JWT with string payload
-      req.user = { id: payload };
+      // rarely used: JWT with string payload -> treat as user id and load user
+      const user = await userRepo.getUserById(payload ?? "unknown");
+      if (!user) {
+        const err = new Error("Unauthorized: user not found");
+        (err as any).statusCode = 401;
+        return next(err);
+      }
+      // convert ObjectId to string and avoid duplicate _id when spreading
+      const { _id, ...userWithoutId } = user as any;
+      req.user = { _id: _id.toString(), ...userWithoutId };
     } else {
       const id =
         (payload.sub as string) ??
         (payload.userId as string) ??
         (payload.id as string);
-      req.user = {
-        id: id ?? "unknown",
-        role: (payload.role as string) ?? undefined,
-        ...payload,
-      };
+      const user = await userRepo.getUserById(id ?? "unknown");
+      if (!user) {
+        const err = new Error("Unauthorized: user not found");
+        (err as any).statusCode = 401;
+        return next(err);
+      }
+      // convert ObjectId to string and avoid duplicate _id when spreading
+      const { _id, ...userWithoutId } = user as any;
+      req.user = { _id: _id.toString(), ...userWithoutId };
     }
-
     return next();
   } catch (err) {
     const e = err as Error;
@@ -79,7 +91,8 @@ export function authorize(...allowedRoles: string[]) {
     // If no roles provided, allow any authenticated user
     if (allowedRoles.length === 0) return next();
 
-    const role = user.role ?? "user";
+    const role = user.role;
+  
     if (!allowedRoles.includes(role)) {
       const err = new Error("Forbidden: insufficient role");
       (err as any).statusCode = 403;

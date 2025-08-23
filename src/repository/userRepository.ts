@@ -22,5 +22,14 @@ export const userRepo = {
    */
   async findByReferralCode(referralCode: string) {
     return User.findOne({ referralCode }).exec();
-  }
+  },
+
+  /**
+   * Get a user by id
+   */
+
+  async getUserById(id: string) {
+    const user = await User.findById(id).lean();
+    return user;
+  },
 };

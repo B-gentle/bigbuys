@@ -8,7 +8,9 @@ import cors from "cors";
 import { env } from "./commons/env";
 const PORT = env.PORT || 5000;
 import userRoutes from "./routes/userRoutes"
+import foodRoutes from "./routes/foodRoutes"
 import cookieParser from "cookie-parser";
+import path from "path";
 
 connectDB();
 const app = express();
@@ -22,6 +24,9 @@ app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(openApiSpec));
 
 // routes
 app.use("/api/users", userRoutes);
+app.use("/api/food", foodRoutes);
+
+app.use("/uploads", express.static(path.join(__dirname, "uploads")))
 
 app.get("/", (_, res: Response) => {
   res.send("Buy at bigbuys!");
