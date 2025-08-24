@@ -1,5 +1,6 @@
 import z from "zod";
 import { extendZodWithOpenApi } from "@asteasolutions/zod-to-openapi";
+import { paginationQueryWithSort } from "../rootSchema";
 extendZodWithOpenApi(z);
 
 export const createComboSchema = z
@@ -16,7 +17,7 @@ export const createComboSchema = z
     },
   });
 
-export const getComboQuery = z.object({
+export const getComboQuery = paginationQueryWithSort.extend({
   name: z.string().min(2).max(100).optional(),
   price: z.number().min(0).optional(),
   search: z.string().optional(),

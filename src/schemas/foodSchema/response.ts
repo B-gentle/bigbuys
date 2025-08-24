@@ -24,7 +24,7 @@ export const createComboRes = z
     },
   });
 
-export const getComboRes = z
+export const getSingleComboRes = z
   .object({
     _id: z.string(),
     name: z.string(),
@@ -50,3 +50,11 @@ export const getComboRes = z
       __v: 0,
     },
   });
+
+export const getComboRes = z.object({
+  total: z.number().openapi({ example: 4 }),
+  page: z.number().openapi({ example: 1 }),
+  limit: z.number().openapi({ example: 10 }),
+  pages: z.number().openapi({ example: 1 }),
+  combos: z.array(getSingleComboRes),
+});

@@ -19,6 +19,7 @@ const app = express();
 app.use(requestLogger);
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(openApiSpec));
 

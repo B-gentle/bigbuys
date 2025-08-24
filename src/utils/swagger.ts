@@ -2,21 +2,28 @@ import {
   OpenAPIRegistry,
   OpenApiGeneratorV3,
 } from "@asteasolutions/zod-to-openapi";
-import {
-  signInSchema,
-  signUpSchema,
-  userResponse,
-} from "../schemas/userSchema";
 import { genericRequestBody } from "./requestResponse";
 import {
   createComboSchema,
   getComboQuery,
 } from "../schemas/foodSchema/request";
-import { createComboRes, getComboRes } from "../schemas/foodSchema/response";
+import {
+  createComboRes,
+  getComboRes,
+  getSingleComboRes,
+} from "../schemas/foodSchema/response";
 import z from "zod";
+import {
+  signInSchema,
+  signUpSchema,
+  userResponse,
+} from "../schemas/userSchema";
+import { idSchema } from "../schemas/rootSchema";
 
 const registry = new OpenAPIRegistry();
 
+// Auth
+// Sign up user
 registry.registerPath({
   method: "post",
   path: "/api/users/signup",
@@ -38,6 +45,7 @@ registry.registerPath({
   },
 });
 
+// Sign in user
 registry.registerPath({
   method: "post",
   path: "/api/users/signin",
@@ -59,6 +67,8 @@ registry.registerPath({
   },
 });
 
+// Combos
+// Create Combo
 registry.registerPath({
   method: "post",
   path: "/api/food/combo/create",
@@ -87,12 +97,12 @@ registry.registerPath({
   },
 });
 
+// Get All Combos (paginated)
 registry.registerPath({
   method: "get",
   path: "/api/food/combo",
   tags: ["Food"],
   description: "Get food combos",
-  security: [{ authenticate: [] }],
   request: {
     query: getComboQuery,
   },
@@ -101,9 +111,37 @@ registry.registerPath({
       description: "Food combos retrieved successfully",
       content: {
         "application/json": {
-          schema: z.array(getComboRes),
+          schema: getComboRes,
         },
       },
+    },
+    404: {
+      description: "No combos found",
+    },
+    500: { description: "Internal server error" },
+  },
+});
+
+// Get combo By Id
+registry.registerPath({
+  method: "get",
+  path: "/api/food/combo/{id}",
+  tags: ["Food"],
+  description: "Get food combo by ID",
+  request: {
+    params: idSchema,
+  },
+  responses: {
+    200: {
+      description: "Food combo retrieved successfully",
+      content: {
+        "application/json": {
+          schema: getSingleComboRes,
+        },
+      },
+    },
+    400: {
+      description: "Invalid combo ID",
     },
     500: { description: "Internal server error" },
   },
@@ -119,5 +157,13 @@ export const openApiSpec = generator.generateDocument({
     description: "API documentation for the Food ordering app",
   },
   servers: [{ url: "http://localhost:5000" }],
-  security: [{ bearerAuth: [] }],
+  // components: {
+  //   securitySchemes: {
+  //     bearerAuth: {
+  //       type: "http",
+  //       scheme: "bearer",
+  //       bearerFormat: "JWT",
+  //     },
+  //   },
+  // },
 });
